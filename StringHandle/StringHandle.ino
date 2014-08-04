@@ -29,9 +29,15 @@ rgb_led::rgb_led(uint8_t r,uint8_t g,uint8_t b, bool mod){
 	r_pin = r;
 	g_pin = g;
 	b_pin = b;
+	r_value = 0;
+	g_value = 0;
+	b_value = 0;
 	pinMode(r_pin, OUTPUT);
 	pinMode(g_pin, OUTPUT);
 	pinMode(b_pin, OUTPUT);
+	digitalWrite(r_pin,1);
+	digitalWrite(g_pin,1);
+	digitalWrite(b_pin,1);
 }
 
 void rgb_led::writeOutput(uint8_t r_out, uint8_t g_out, uint8_t b_out){
@@ -57,47 +63,54 @@ void rgb_led::setColor(uint8_t r, uint8_t g, uint8_t b){
 }
 
 void rgb_led::setRandom(){
-	r_value = random(0,255);
-	g_value = random(0,255);
-	b_value = random(0,255);
+	r_value = uint8_t(random(255));
+	g_value = uint8_t(random(255));
+	b_value = uint8_t(random(255));
 	writeOutput(r_value,g_value,b_value);
 }
 
 // ----------------------------------------
 
-rgb_led output(7,8,9,true);
+rgb_led output(6,9,11,false);
 
 void setup(){
 	Serial.begin(115200);
+	Serial.println("--- Begin ---");
 }
 
 void loop(){
-	String Command = readString();
-	if(Command == "Red"){
-		output.r_value = askForColor(Command);
-		output.setColor();
-	}
-	else if(Command == "Green"){
-		output.g_value = askForColor(Command);
-		output.setColor();
-	}
-	else if(Command == "Blue"){
-		output.b_value = askForColor(Command);
-		output.setColor();
-	}
-	else if(Command == "Random"){
-		output.setRandom();
-		char out_buffer[128];
-		sprintf(out_buffer,"New Values! \n Red = %u \n Green = %u \n Blue = %u;");
-		Serial.println(out_buffer);
-	}
-	else if(Command == "Status"){
-		char out_buffer[128];
-		sprintf(out_buffer,"Status \n Red = %u \n Green = %u \n Blue = %u;");
-		Serial.println(out_buffer);
-	}
-	else{
-		Serial.println(Command + " is not a Valid Command");
+	if(Serial.available()){
+		String Command = readString();
+		if(Command == "Red"){
+			output.r_value = askForColor(Command);
+			output.setColor();
+			Serial.println("The new value for " + Command +" is " + String(output.r_value));
+		}
+		else if(Command == "Green"){
+			output.g_value = askForColor(Command);
+			output.setColor();
+			Serial.println("The new value for " + Command +" is " + String(output.g_value));
+		}
+		else if(Command == "Blue"){
+			output.b_value = askForColor(Command);
+			output.setColor();
+			Serial.println("The new value for " + Command +" is " + String(output.b_value));
+		}
+		else if(Command == "Random"){
+			output.setRandom();
+			char out_buffer[128];
+			sprintf(out_buffer,"New Values! \n Red = %u \n Green = %u \n Blue = %u",output.r_value,output.b_value,output.g_value);
+			Serial.println(out_buffer);
+		}
+		else if(Command == "Status"){
+			char out_buffer[128];
+			sprintf(out_buffer,"Status \n Red = %u \n Green = %u \n Blue = %u",output.r_value,output.b_value,output.g_value);
+			Serial.println(out_buffer);
+		}
+		else{
+			Serial.println(Command + " is not a Valid Command");
+		}
+		Serial.println("--- --- ---");
 	}
 }
 
@@ -122,4 +135,3 @@ String readString()
 	}
 	return output;
 }
-
